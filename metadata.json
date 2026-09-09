@@ -1,0 +1,6 @@
+{
+  "name": "Digital Institute of Computer Education - Scholarship Exam",
+  "description": "ڈجیٹل انسٹیٹیوٹ آف کمپیوٹر ایجوکیشن (DICE) کا جدید، محفوظ اور اسمارٹ اسکالرشپ و قابلیت امتحانی پورٹل",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,109 @@
+@import "tailwindcss";
+
+@layer base {
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: #f0ebf8;
+    color: #202124;
+  }
+}
+
+/* Urdu Typography Optimization with ample line height and clear letter rendering */
+.font-urdu,
+[dir="rtl"],
+.urdu-text {
+  font-family: 'Noto Nastaliq Urdu', 'Noto Sans Arabic', 'Jameel Noori Nastaleeq', 'Urdu Typesetting', system-ui, -apple-system, sans-serif;
+  line-height: 2.3 !important;
+  word-spacing: 0.16em;
+  letter-spacing: 0 !important;
+  text-rendering: optimizeLegibility;
+}
+
+.font-urdu h1,
+.font-urdu h2,
+.font-urdu h3,
+.font-urdu h4,
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3 {
+  line-height: 2.2 !important;
+  letter-spacing: 0 !important;
+  margin-bottom: 0.35rem;
+}
+
+.font-urdu p,
+[dir="rtl"] p {
+  line-height: 2.25 !important;
+  letter-spacing: 0 !important;
+}
+
+/* Google Forms styling accents */
+.google-form-bg {
+  background-color: #f0ebf8;
+}
+
+.google-purple {
+  color: #673ab7;
+}
+
+.bg-google-purple {
+  background-color: #673ab7;
+}
+
+.border-google-purple {
+  border-color: #673ab7;
+}
+
+/* Google Forms Question Card styling with active strip */
+.g-card {
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #dadce0;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.g-card-active {
+  border-right-width: 6px;
+  border-right-color: #673ab7;
+  box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+}
+
+[dir="ltr"] .g-card-active {
+  border-right-width: 1px;
+  border-right-color: #dadce0;
+  border-left-width: 6px;
+  border-left-color: #673ab7;
+}
+
+/* Google Forms Underline Input effect */
+.g-input-underline {
+  border: none;
+  border-bottom: 1px solid #dadce0;
+  border-radius: 0;
+  padding: 0.5rem 0.25rem;
+  background: transparent;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.g-input-underline:focus {
+  outline: none;
+  border-bottom: 2px solid #673ab7;
+}
+
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+  .print-card {
+    box-shadow: none !important;
+    border: 1px solid #cbd5e1 !important;
+    page-break-inside: avoid;
+  }
+}
