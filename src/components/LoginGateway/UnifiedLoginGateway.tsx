@@ -29,8 +29,8 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
   const [adminPassword, setAdminPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Validate student roll number rule:
-  // A + Even digit + B + Odd digit (e.g. A2B3, A4B7)
+  // Strict roll number validation
+  // Format: A + Even digit + B + Odd digit (e.g. A2B3, A4B7)
   // Special allowed: A3B4
   const isValidRollNumber = (raw: string): boolean => {
     const r = raw.trim().toUpperCase();
@@ -41,7 +41,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
 
   const handleSubmitStudent = (e: React.FormEvent) => {
     e.preventDefault();
-    const cleanId = enteredId.trim();
+    const cleanId = enteredId.trim().toUpperCase();
 
     if (!cleanId) {
       setErrorMessage(
@@ -51,12 +51,6 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
           ? 'Barah-e-karam apna durust Roll Number darj karein!'
           : 'Please enter your assigned Student Roll Number!'
       );
-      return;
-    }
-
-    // Allow admin master key from main input (convenience)
-    if (cleanId === '@#$%^&*') {
-      onLoginAsAdmin();
       return;
     }
 
@@ -73,39 +67,78 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
 
     setErrorMessage(null);
     setIsSubmitting(true);
-    // Small delay for better UX feel
     setTimeout(() => {
-      onLoginAsStudent(cleanId.toUpperCase());
+      onLoginAsStudent(cleanId);
       setIsSubmitting(false);
-    }, 280);
+    }, 250);
   };
 
-  const handleSubmitAdmin = (e: React.FormEvent) => {
+  const handleSubmitAdmin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminPassword.trim() === '@#$%^&*') {
-      setIsSubmitting(true);
-      setTimeout(() => {
-        onLoginAsAdmin();
-        setIsSubmitting(false);
-      }, 280);
-    } else {
+    const password = adminPassword.trim();
+
+    if (!password) {
       setErrorMessage(
         lang === 'ur'
-          ? 'غلط ایڈمن سیکیورٹی پاس ورڈ! رسائی مسترد کر دی گئی۔'
+          ? 'براہ کرم ایڈمن سیکیورٹی پاس ورڈ درج کریں۔'
           : lang === 'roman'
-          ? 'Ghalat Admin Security Password! Access denied.'
-          : 'Invalid Admin Security Password! Access denied.'
+          ? 'Barah-e-karam Admin security password darj karein.'
+          : 'Please enter the Admin security password.'
       );
+      return;
+    }
+
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Store a lightweight session flag (cleared on tab close)
+        try {
+          sessionStorage.setItem('dice_admin_session', data.token || 'authenticated');
+        } catch {
+          // ignore storage errors
+        }
+        onLoginAsAdmin();
+      } else {
+        setErrorMessage(
+          data.message ||
+            (lang === 'ur'
+              ? 'غلط ایڈمن سیکیورٹی پاس ورڈ! رسائی مسترد کر دی گئی۔'
+              : lang === 'roman'
+              ? 'Ghalat Admin Security Password! Access denied.'
+              : 'Invalid Admin Security Password! Access denied.')
+        );
+      }
+    } catch (err) {
+      console.error('Admin login error:', err);
+      setErrorMessage(
+        lang === 'ur'
+          ? 'سرور سے رابطہ نہیں ہو سکا۔ براہ کرم دوبارہ کوشش کریں۔'
+          : lang === 'roman'
+          ? 'Server se rabta nahi ho saka. Dobara koshish karein.'
+          : 'Could not reach the server. Please try again.'
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-hidden">
-      {/* Ambient background glow */}
+      {/* Ambient glow */}
       <div className="absolute top-0 left-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 right-1/4 w-72 h-72 sm:w-96 sm:h-96 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
 
-      {/* Top Header */}
+      {/* Header */}
       <header className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-6 flex items-center justify-between z-10 gap-3">
         <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
           <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white shrink-0">
@@ -118,56 +151,33 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             <p className="text-[11px] sm:text-xs text-indigo-300 font-medium truncate">
               {lang === 'ur'
                 ? 'اسکالرشپ و قابلیت امتحانی پورٹل (DICE)'
-                : lang === 'roman'
-                ? 'Scholarship & Merit Assessment Portal'
                 : 'Scholarship & Merit Assessment Portal'}
             </p>
           </div>
         </div>
 
-        {/* Language Switcher */}
         <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/80 backdrop-blur-md shrink-0">
           <Globe className="w-3.5 h-3.5 text-slate-400 mx-1.5 hidden sm:inline" />
-          <button
-            type="button"
-            onClick={() => onLanguageChange('ur')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
-              lang === 'ur'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            اردو
-          </button>
-          <button
-            type="button"
-            onClick={() => onLanguageChange('roman')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
-              lang === 'roman'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            Roman
-          </button>
-          <button
-            type="button"
-            onClick={() => onLanguageChange('en')}
-            className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
-              lang === 'en'
-                ? 'bg-indigo-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            EN
-          </button>
+          {(['ur', 'roman', 'en'] as Language[]).map((l) => (
+            <button
+              key={l}
+              type="button"
+              onClick={() => onLanguageChange(l)}
+              className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[11px] sm:text-xs font-semibold transition-all cursor-pointer ${
+                lang === l
+                  ? 'bg-indigo-600 text-white shadow-sm'
+                  : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              {l === 'ur' ? 'اردو' : l === 'roman' ? 'Roman' : 'EN'}
+            </button>
+          ))}
         </div>
       </header>
 
-      {/* Main Login Card */}
+      {/* Login Card */}
       <main className="w-full max-w-md mx-auto px-4 sm:px-6 my-auto py-6 sm:py-8 z-10">
         <div className="bg-slate-800/95 rounded-3xl border border-slate-700/80 shadow-2xl p-6 sm:p-8 backdrop-blur-xl space-y-6">
-          {/* Card Header */}
           <div className="text-center space-y-2">
             <div className="inline-flex p-3 rounded-2xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 mb-1">
               {showAdminField ? (
@@ -192,10 +202,10 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             <p className="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
               {showAdminField
                 ? lang === 'ur'
-                  ? 'پرچہ کنٹرول، رزلٹ اور چیکنگ کے لیے ایڈمن پاس ورڈ درج کریں۔'
+                  ? 'پرچہ کنٹرول، رزلٹ اور چیکنگ کے لیے محفوظ ایڈمن پاس ورڈ درج کریں۔'
                   : lang === 'roman'
-                  ? 'Paper control, result aur checking ke liye Admin password darj karein.'
-                  : 'Enter the master security password to access paper control & grading.'
+                  ? 'Paper control aur grading ke liye secure Admin password darj karein.'
+                  : 'Enter the secure admin password for paper control & grading.'
                 : lang === 'ur'
                 ? 'اپنا تفویض کردہ رول نمبر درج کریں (فارمیٹ: A + جفت عدد + B + طاق عدد)'
                 : lang === 'roman'
@@ -204,7 +214,6 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             </p>
           </div>
 
-          {/* Student Login Form */}
           {!showAdminField ? (
             <form onSubmit={handleSubmitStudent} className="space-y-4">
               <div className="space-y-2">
@@ -212,38 +221,28 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
                   htmlFor="roll-input"
                   className="block text-xs font-bold text-slate-300 uppercase tracking-wider"
                 >
-                  {lang === 'ur'
-                    ? 'طالب علم کا رول نمبر'
-                    : lang === 'roman'
-                    ? 'Student Roll Number'
-                    : 'Student Roll Number'}
+                  {lang === 'ur' ? 'طالب علم کا رول نمبر' : 'Student Roll Number'}
                 </label>
-                <div className="relative">
-                  <input
-                    id="roll-input"
-                    type="text"
-                    value={enteredId}
-                    onChange={(e) => {
-                      setEnteredId(e.target.value.toUpperCase());
-                      if (errorMessage) setErrorMessage(null);
-                    }}
-                    placeholder={
-                      lang === 'ur'
-                        ? 'مثال: A2B3 یا A4B7'
-                        : 'e.g. A2B3 or A4B7'
-                    }
-                    maxLength={8}
-                    className="w-full px-4 py-3.5 bg-slate-900/90 border border-slate-700 rounded-2xl text-white font-mono text-center text-lg tracking-widest placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-inner"
-                    autoFocus
-                    autoComplete="off"
-                    disabled={isSubmitting}
-                  />
-                </div>
+                <input
+                  id="roll-input"
+                  type="text"
+                  value={enteredId}
+                  onChange={(e) => {
+                    setEnteredId(e.target.value.toUpperCase());
+                    if (errorMessage) setErrorMessage(null);
+                  }}
+                  placeholder={lang === 'ur' ? 'مثال: A2B3 یا A4B7' : 'e.g. A2B3 or A4B7'}
+                  maxLength={8}
+                  className="w-full px-4 py-3.5 bg-slate-900/90 border border-slate-700 rounded-2xl text-white font-mono text-center text-lg tracking-widest placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all shadow-inner"
+                  autoFocus
+                  autoComplete="off"
+                  disabled={isSubmitting}
+                />
                 <p className="text-[11px] text-slate-500 text-center leading-relaxed">
                   {lang === 'ur'
                     ? 'قاعدہ: A کے ساتھ جفت عدد (0,2,4,6,8) اور B کے ساتھ طاق عدد (1,3,5,7,9)'
                     : lang === 'roman'
-                    ? 'Rule: A ke sath even number (0,2,4,6,8) aur B ke sath odd number (1,3,5,7,9)'
+                    ? 'Rule: A ke sath even (0,2,4,6,8) aur B ke sath odd (1,3,5,7,9)'
                     : 'Rule: Even digit with A and Odd digit with B'}
                 </p>
               </div>
@@ -256,7 +255,6 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
               )}
 
               <button
-                id="login-gateway-submit-btn"
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 disabled:opacity-70 text-white font-bold text-sm shadow-lg shadow-indigo-600/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
@@ -281,38 +279,30 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
               </button>
             </form>
           ) : (
-            /* Admin Password Form */
             <form onSubmit={handleSubmitAdmin} className="space-y-4">
               <div className="space-y-2">
                 <label
                   htmlFor="admin-pass-input"
                   className="block text-xs font-bold text-amber-300 uppercase tracking-wider"
                 >
-                  {lang === 'ur'
-                    ? 'ایڈمن سیکیورٹی کلید'
-                    : lang === 'roman'
-                    ? 'Admin Security Key'
-                    : 'Admin Security Key'}
+                  {lang === 'ur' ? 'ایڈمن سیکیورٹی کلید' : 'Admin Security Key'}
                 </label>
-                <div className="relative">
-                  <input
-                    id="admin-pass-input"
-                    type="password"
-                    value={adminPassword}
-                    onChange={(e) => {
-                      setAdminPassword(e.target.value);
-                      if (errorMessage) setErrorMessage(null);
-                    }}
-                    placeholder={
-                      lang === 'ur'
-                        ? 'سیکیورٹی پاس ورڈ درج کریں...'
-                        : 'Enter security password...'
-                    }
-                    className="w-full px-4 py-3.5 bg-slate-900/90 border border-amber-500/40 rounded-2xl text-white font-mono text-center text-lg tracking-widest placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-inner"
-                    autoFocus
-                    disabled={isSubmitting}
-                  />
-                </div>
+                <input
+                  id="admin-pass-input"
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => {
+                    setAdminPassword(e.target.value);
+                    if (errorMessage) setErrorMessage(null);
+                  }}
+                  placeholder={
+                    lang === 'ur' ? 'سیکیورٹی پاس ورڈ درج کریں...' : 'Enter security password...'
+                  }
+                  className="w-full px-4 py-3.5 bg-slate-900/90 border border-amber-500/40 rounded-2xl text-white font-mono text-center text-lg tracking-widest placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-amber-500 transition-all shadow-inner"
+                  autoFocus
+                  autoComplete="current-password"
+                  disabled={isSubmitting}
+                />
               </div>
 
               {errorMessage && (
@@ -323,7 +313,6 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
               )}
 
               <button
-                id="admin-login-submit-btn"
                 type="submit"
                 disabled={isSubmitting}
                 className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 disabled:opacity-70 text-slate-950 font-black text-sm shadow-lg shadow-amber-600/25 flex items-center justify-center gap-2 transition-all active:scale-[0.98] cursor-pointer"
@@ -331,7 +320,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
                 {isSubmitting ? (
                   <span className="flex items-center gap-2">
                     <span className="w-4 h-4 border-2 border-slate-900/30 border-t-slate-900 rounded-full animate-spin" />
-                    {lang === 'ur' ? 'کھول رہے ہیں...' : 'Opening...'}
+                    {lang === 'ur' ? 'تصدیق ہو رہی ہے...' : 'Verifying...'}
                   </span>
                 ) : (
                   <>
@@ -349,7 +338,6 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             </form>
           )}
 
-          {/* Switch between Student and Admin */}
           <div className="pt-4 border-t border-slate-700/70 text-center">
             <button
               type="button"
@@ -385,7 +373,6 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
         </div>
       </main>
 
-      {/* Footer */}
       <footer className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-4 text-center text-[11px] sm:text-xs text-slate-500 z-10">
         Digital Institute of Computer Education • Scholarship & Merit Examination Portal
       </footer>

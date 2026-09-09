@@ -1,12 +1,17 @@
 import express from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
-import { GoogleGenAI, Type } from '@google/genai';
+import { GoogleGenAI } from '@google/genai';
 import { INITIAL_SUBMISSIONS } from './src/data/mockSubmissions';
 import { ExamSubmission, ComprehensiveReport } from './src/types';
 
-// In-memory persistent storage initialized with sample data
+// In-memory storage (note: on Vercel serverless this resets between cold starts)
 let submissions: ExamSubmission[] = [...INITIAL_SUBMISSIONS];
+
+// Simple in-memory rate limiting for admin login attempts
+const adminLoginAttempts = new Map<string, { count: number; lastAttempt: number }>();
+const MAX_ADMIN_ATTEMPTS = 8;
+const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
 
 let aiClient: GoogleGenAI | null = null;
 function getAI(): GoogleGenAI | null {
@@ -15,7 +20,7 @@ function getAI(): GoogleGenAI | null {
       apiKey: process.env.GEMINI_API_KEY,
       httpOptions: {
         headers: {
-          'User-Agent': 'aistudio-build',
+          'User-Agent': 'dice-exam-portal',
         },
       },
     });
@@ -23,47 +28,120 @@ function getAI(): GoogleGenAI | null {
   return aiClient;
 }
 
+function getAdminSecret(): string {
+  // Prefer environment variable. Fallback only for backward compatibility.
+  return process.env.ADMIN_SECRET || '@#$%^&*';
+}
+
+function getClientIp(req: express.Request): string {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (typeof forwarded === 'string') {
+    return forwarded.split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = process.env.PORT || 3000;
 
-  app.use(express.json({ limit: '10mb' }));
+  // Basic security headers
+  app.use((req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('X-XSS-Protection', '1; mode=block');
+    next();
+  });
+
+  app.use(express.json({ limit: '2mb' })); // reduced from 10mb for safety
 
   // Health check
   app.get('/api/health', (req, res) => {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
-  // Get all exams (with optional status filtering)
+  // ===================== SECURE ADMIN LOGIN =====================
+  app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body || {};
+    const ip = getClientIp(req);
+    const now = Date.now();
+
+    // Rate limiting
+    const record = adminLoginAttempts.get(ip) || { count: 0, lastAttempt: 0 };
+
+    if (record.count >= MAX_ADMIN_ATTEMPTS && now - record.lastAttempt < LOCKOUT_MS) {
+      const remainingMin = Math.ceil((LOCKOUT_MS - (now - record.lastAttempt)) / 60000);
+      return res.status(429).json({
+        success: false,
+        message: `Too many failed attempts. Try again in ${remainingMin} minute(s).`,
+      });
+    }
+
+    // Reset counter if lockout period passed
+    if (now - record.lastAttempt >= LOCKOUT_MS) {
+      record.count = 0;
+    }
+
+    const expected = getAdminSecret();
+
+    if (typeof password !== 'string' || password.trim() !== expected) {
+      record.count += 1;
+      record.lastAttempt = now;
+      adminLoginAttempts.set(ip, record);
+
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid admin credentials',
+      });
+    }
+
+    // Success — clear attempts
+    adminLoginAttempts.delete(ip);
+
+    res.json({
+      success: true,
+      message: 'Admin authenticated',
+      // Simple session flag (frontend can store in memory / sessionStorage)
+      token: `admin_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+    });
+  });
+
+  // Get all exams
   app.get('/api/exams', (req, res) => {
     const { status } = req.query;
-    let results = submissions;
+    let results = [...submissions];
     if (status && typeof status === 'string' && status !== 'all') {
-      results = submissions.filter((s) => s.status === status);
+      results = results.filter((s) => s.status === status);
     }
-    // Return sorted newest first
     results.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
     res.json({ success: true, exams: results });
   });
 
-  // Search exams by Student ID, Roll No, or Name
+  // Search exams
   app.get('/api/exams/search', (req, res) => {
-    const query = (req.query.q as string || '').trim().toLowerCase();
+    const query = ((req.query.q as string) || '').trim().toLowerCase();
     if (!query) {
       return res.json({ success: true, exams: submissions });
     }
-    const matched = submissions.filter((s) =>
-      s.studentId.toLowerCase().includes(query) ||
-      s.rollNo.toLowerCase().includes(query) ||
-      s.student.name.toLowerCase().includes(query)
+    const matched = submissions.filter(
+      (s) =>
+        s.studentId.toLowerCase().includes(query) ||
+        s.rollNo.toLowerCase().includes(query) ||
+        s.student.name.toLowerCase().includes(query)
     );
     res.json({ success: true, exams: matched });
   });
 
-  // Get single exam by ID or studentId
+  // Get single exam
   app.get('/api/exams/:id', (req, res) => {
     const { id } = req.params;
-    const submission = submissions.find((s) => s.id === id || s.studentId.toLowerCase() === id.toLowerCase() || s.rollNo === id);
+    const submission = submissions.find(
+      (s) =>
+        s.id === id ||
+        s.studentId.toLowerCase() === id.toLowerCase() ||
+        s.rollNo === id
+    );
     if (!submission) {
       return res.status(404).json({ success: false, message: 'Exam submission not found' });
     }
@@ -76,7 +154,14 @@ async function startServer() {
     if (!newSubmission || !newSubmission.studentId) {
       return res.status(400).json({ success: false, message: 'Invalid submission data' });
     }
-    const existingIndex = submissions.findIndex((s) => s.id === newSubmission.id || s.studentId === newSubmission.studentId);
+
+    // Basic sanitization
+    newSubmission.studentId = String(newSubmission.studentId).trim().slice(0, 32);
+    newSubmission.rollNo = String(newSubmission.rollNo || newSubmission.studentId).trim().slice(0, 32);
+
+    const existingIndex = submissions.findIndex(
+      (s) => s.id === newSubmission.id || s.studentId === newSubmission.studentId
+    );
     if (existingIndex >= 0) {
       submissions[existingIndex] = newSubmission;
     } else {
@@ -85,7 +170,7 @@ async function startServer() {
     res.json({ success: true, exam: newSubmission });
   });
 
-  // Grade / Check exam & publish
+  // Grade exam
   app.post('/api/exams/:id/grade', (req, res) => {
     const { id } = req.params;
     const {
@@ -120,7 +205,7 @@ async function startServer() {
     res.json({ success: true, exam: updated });
   });
 
-  // AI Auto-Evaluation Endpoint (Gemini 3.8 Flash)
+  // AI Auto-Evaluation
   app.post('/api/ai-evaluate', async (req, res) => {
     const { submission } = req.body;
     if (!submission) {
@@ -128,10 +213,15 @@ async function startServer() {
     }
 
     const student = submission.student || {};
-    const intro = (submission.introAnswers || []).map((i: any) => `${i.questionUrdu}: ${i.answer}`).join('\n');
+    const intro = (submission.introAnswers || [])
+      .map((i: any) => `${i.questionUrdu}: ${i.answer}`)
+      .join('\n');
     const subjectiveEntries = Object.entries(submission.answers || {})
       .filter(([_, ans]: any) => ans.textAnswer)
-      .map(([qid, ans]: any) => `Question (${qid}):\nAnswer: "${ans.textAnswer}"\nDetected Emotion: ${ans.emotionDetected}\n`)
+      .map(
+        ([qid, ans]: any) =>
+          `Question (${qid}):\nAnswer: "${ans.textAnswer}"\nDetected Emotion: ${ans.emotionDetected}\n`
+      )
       .join('\n');
 
     try {
@@ -222,10 +312,10 @@ Produce a thorough JSON evaluation matching this structure:
         }
       }
     } catch (err) {
-      console.warn('Gemini API call skipped or errored, utilizing intelligent algorithmic evaluation fallback:', err);
+      console.warn('Gemini API call skipped or errored, using fallback evaluation:', err);
     }
 
-    // Heuristic algorithmic fallback when Gemini is unavailable or not set
+    // Heuristic fallback
     const fallbackScores: Record<string, number> = {};
     const fallbackFeedback: Record<string, string> = {};
     let subTotal = 0;
@@ -233,22 +323,37 @@ Produce a thorough JSON evaluation matching this structure:
     Object.entries(submission.answers || {}).forEach(([qid, ans]: any) => {
       if (ans.textAnswer) {
         const words = (ans.textAnswer || '').trim().split(/\s+/).length;
-        // Subjective questions are out of 25 marks
         const mark = Math.min(25, Math.max(15, Math.round(words / 4) + 14));
         fallbackScores[qid] = mark;
-        fallbackFeedback[qid] = 'عمدہ، جامع اور فکری جواب۔ طالب علم نے اپنے وژن اور خاندانی عزم کو خوبصورتی سے بیان کیا ہے۔';
+        fallbackFeedback[qid] =
+          'عمدہ، جامع اور فکری جواب۔ طالب علم نے اپنے وژن اور خاندانی عزم کو خوبصورتی سے بیان کیا ہے۔';
         subTotal += mark;
       }
     });
 
     const totalObj = submission.totalObjectiveScore || 50;
-    const totalSub = submission.totalSubjectiveScore !== undefined ? submission.totalSubjectiveScore : (Object.keys(fallbackScores).length * 25);
+    const totalSub =
+      submission.totalSubjectiveScore !== undefined
+        ? submission.totalSubjectiveScore
+        : Object.keys(fallbackScores).length * 25;
     const totalPossible = Math.max(1, totalObj + totalSub);
-    let overallPct = Math.min(100, Math.round((((submission.rawObjectiveScore || 0) + subTotal) / totalPossible) * 100));
+    let overallPct = Math.min(
+      100,
+      Math.round((((submission.rawObjectiveScore || 0) + subTotal) / totalPossible) * 100)
+    );
     if (submission.isHafiz) {
       overallPct = Math.min(100, Math.max(25, overallPct + 25));
     }
-    const tier = overallPct >= 90 ? 'Platinum' : overallPct >= 80 ? 'Gold' : overallPct >= 70 ? 'Silver' : overallPct >= 60 ? 'Bronze' : 'Recognition';
+    const tier =
+      overallPct >= 90
+        ? 'Platinum'
+        : overallPct >= 80
+        ? 'Gold'
+        : overallPct >= 70
+        ? 'Silver'
+        : overallPct >= 60
+        ? 'Bronze'
+        : 'Recognition';
 
     const fallbackReport: ComprehensiveReport = {
       academicScores: {
@@ -307,7 +412,8 @@ Produce a thorough JSON evaluation matching this structure:
         focusSubjects: ['تخلیقی مضامین اور زبان دانی', 'عملی سائنسی تجربات', 'منطقی پہیلیاں'],
         recommendedLearningStyle: 'بصری خاکوں اور عملی مثالوں کے ذریعے تدریس',
         recommendedResources: ['بچوں کے سائنسی میگزین', 'آن لائن کوئز ماسٹر', 'اردو لغت اور اقوال'],
-        adviceForParentsAndTeachers: 'طالب علم کے اندر سیکھنے کا سچا جذبہ موجود ہے؛ انہیں مطالعے کے مزید مواقع فراہم کیے جائیں۔',
+        adviceForParentsAndTeachers:
+          'طالب علم کے اندر سیکھنے کا سچا جذبہ موجود ہے؛ انہیں مطالعے کے مزید مواقع فراہم کیے جائیں۔',
       },
     };
 
@@ -323,7 +429,7 @@ Produce a thorough JSON evaluation matching this structure:
     });
   });
 
-  // AI Examiner Co-pilot Assistant endpoint
+  // AI Co-pilot chat
   app.post('/api/ai-chat', async (req, res) => {
     const { prompt, context } = req.body;
     if (!prompt) {
@@ -356,18 +462,24 @@ Provide a helpful, precise, professional response.`;
       console.warn('AI chat error:', err);
     }
 
-    // Heuristic assistant response fallback
-    let fallbackReply = 'ایڈمن کوٹہ اصول کے تحت 100% مکمل اسکالرشپ صرف میرٹ لسٹ کے پہلے (رینک 1) طالب علم کے لیے ہے، 50% اسکالرشپ زیادہ سے زیادہ 2 طلبہ (رینک 2 اور 3) کے لیے ہے، اور 25% اسکالرشپ باقی تمام پاس طلبہ کو دی جا سکتی ہے۔';
-    if (prompt.toLowerCase().includes('essay') || prompt.toLowerCase().includes('written') || prompt.includes('تحریر')) {
-      fallbackReply = 'طالب علم کی تحریر میں تخلیقی سوچ، معاشرتی شعور اور دیانتداری کو بنیادی اہمیت دیں۔ پارٹ 4 کے جوابی مواد میں خیالات کی گہرائی اور اخلاقی پختگی کے مطابق 8 سے 10 نمبرات تجویز کیے جاتے ہیں۔';
+    let fallbackReply =
+      'ایڈمن کوٹہ اصول کے تحت 100% مکمل اسکالرشپ صرف میرٹ لسٹ کے پہلے (رینک 1) طالب علم کے لیے ہے، 50% اسکالرشپ زیادہ سے زیادہ 2 طلبہ (رینک 2 اور 3) کے لیے ہے، اور 25% اسکالرشپ باقی تمام پاس طلبہ کو دی جا سکتی ہے۔';
+    if (
+      prompt.toLowerCase().includes('essay') ||
+      prompt.toLowerCase().includes('written') ||
+      prompt.includes('تحریر')
+    ) {
+      fallbackReply =
+        'طالب علم کی تحریر میں تخلیقی سوچ، معاشرتی شعور اور دیانتداری کو بنیادی اہمیت دیں۔ پارٹ 4 کے جوابی مواد میں خیالات کی گہرائی اور اخلاقی پختگی کے مطابق 8 سے 10 نمبرات تجویز کیے جاتے ہیں۔';
     } else if (prompt.toLowerCase().includes('quota') || prompt.includes('کوٹہ')) {
-      fallbackReply = 'کوٹہ قوانین:\n1. 100% اسکالرشپ: صرف 1 طالب علم (میرٹ + ضرورت انڈیکس سرفہرست)\n2. 50% اسکالرشپ: زیادہ سے زیادہ 1 تا 2 طلبہ\n3. 25% اسکالرشپ: بقیہ تمام اہل و مستحق طلبہ۔';
+      fallbackReply =
+        'کوٹہ قوانین:\n1. 100% اسکالرشپ: صرف 1 طالب علم (میرٹ + ضرورت انڈیکس سرفہرست)\n2. 50% اسکالرشپ: زیادہ سے زیادہ 1 تا 2 طلبہ\n3. 25% اسکالرشپ: بقیہ تمام اہل و مستحق طلبہ۔';
     }
 
     res.json({ success: true, reply: fallbackReply });
   });
 
-  // Vite middleware setup
+  // Vite / Static serving
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -383,7 +495,7 @@ Provide a helpful, precise, professional response.`;
   }
 
   app.listen(PORT, '0.0.0.0', () => {
-    console.log(`OMNI-TEST Server running on http://0.0.0.0:${PORT}`);
+    console.log(`DICE Exam Server running on http://0.0.0.0:${PORT}`);
   });
 }
 
