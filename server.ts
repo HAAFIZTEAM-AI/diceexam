@@ -1,4 +1,5 @@
 import express from 'express';
+import http from 'http';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import { GoogleGenAI, Type } from '@google/genai';
@@ -367,10 +368,23 @@ Provide a helpful, precise, professional response.`;
     res.json({ success: true, reply: fallbackReply });
   });
 
+  // Create an explicit HTTP server so Vite's HMR WebSocket can share it.
+  const httpServer = http.createServer(app);
+
   // Vite middleware setup
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
-      server: { middlewareMode: true },
+      server: {
+        middlewareMode: true,
+        // In middleware mode the `server.hmr` options from vite.config.ts are
+        // ignored, so configure HMR here. Attaching HMR to the same HTTP
+        // server means the WebSocket travels over the same port/path as the
+        // app, so it works both locally and behind the HTTPS preview proxy.
+        // Without this the client opens a WebSocket against the wrong port and
+        // it is closed immediately ("WebSocket closed without opened").
+        // Allow fully disabling HMR via DISABLE_HMR.
+        hmr: process.env.DISABLE_HMR === 'true' ? false : { server: httpServer },
+      },
       appType: 'spa',
     });
     app.use(vite.middlewares);
@@ -382,7 +396,7 @@ Provide a helpful, precise, professional response.`;
     });
   }
 
-  app.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT, '0.0.0.0', () => {
     console.log(`OMNI-TEST Server running on http://0.0.0.0:${PORT}`);
   });
 }
