@@ -30,7 +30,7 @@ export const Navbar: React.FC<NavbarProps> = ({
   const t = translations[lang];
 
   return (
-    <header className="sticky top-0 z-50 bg-slate-900 border-b border-slate-800 text-white shadow-md no-print">
+    <header className="sticky top-0 z-50 bg-white border-b border-slate-200 text-slate-900 no-print">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Brand Logo & Name */}
@@ -38,36 +38,34 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={() => setActiveTab('exam')}
             className="flex items-center gap-3 cursor-pointer group"
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-cyan-400 p-0.5 shadow-lg shadow-indigo-500/20 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <div className="w-full h-full bg-slate-900 rounded-[10px] flex items-center justify-center">
-                <Brain className="w-5 h-5 text-cyan-400" />
-              </div>
+            <div className="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center group-hover:bg-indigo-700 transition-colors">
+              <Brain className="w-5 h-5 text-white" />
             </div>
 
             <div className="flex flex-col">
               <div className="flex items-center gap-2">
-                <span className="font-extrabold text-base sm:text-lg tracking-tight text-white group-hover:text-cyan-300 transition-colors">
+                <span className="font-extrabold text-base sm:text-lg tracking-tight text-slate-900">
                   {t.appName}
                 </span>
-                <span className="text-[10px] font-semibold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+                <span className="text-[10px] font-semibold uppercase tracking-wider bg-indigo-50 text-indigo-600 border border-indigo-100 px-2 py-0.5 rounded-full">
                   v6.0 Adaptive
                 </span>
               </div>
-              <span className="text-xs text-slate-400 font-normal hidden sm:inline">
+              <span className="text-xs text-slate-500 font-normal hidden sm:inline">
                 {t.appSubtitle}
               </span>
             </div>
           </div>
 
           {/* Center Navigation Tabs */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-800/80 p-1 rounded-xl border border-slate-700/60 shadow-inner">
+          <nav className="hidden md:flex items-center gap-1 bg-slate-100 p-1 rounded-xl border border-slate-200">
             <button
               id="nav-exam-btn"
               onClick={() => setActiveTab('exam')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'exam'
                   ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <GraduationCap className="w-4 h-4" />
@@ -80,7 +78,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'search'
                   ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <Search className="w-4 h-4" />
@@ -92,8 +90,8 @@ export const Navbar: React.FC<NavbarProps> = ({
               onClick={() => setActiveTab('admin')}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
                 activeTab === 'admin'
-                  ? 'bg-indigo-600 text-white shadow-sm font-bold'
-                  : 'text-slate-300 hover:text-white hover:bg-slate-700/60'
+                  ? 'bg-slate-900 text-white shadow-sm font-bold'
+                  : 'text-slate-500 hover:text-slate-900 hover:bg-white'
               }`}
             >
               <Award className="w-4 h-4" />
@@ -108,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
           {/* Right Utilities: Language Switcher */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-slate-800 p-1 rounded-xl border border-slate-700 text-xs font-semibold">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200 text-xs font-semibold">
               <div className="px-2 text-slate-400 hidden sm:flex items-center gap-1">
                 <Globe className="w-3.5 h-3.5" />
               </div>
@@ -118,7 +116,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                   lang === 'ur'
                     ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 اردو
@@ -129,7 +127,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                   lang === 'roman'
                     ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Roman
@@ -140,7 +138,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 className={`px-2.5 py-1 rounded-lg transition-all cursor-pointer ${
                   lang === 'en'
                     ? 'bg-indigo-600 text-white font-bold shadow-xs'
-                    : 'text-slate-400 hover:text-slate-200'
+                    : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 English
@@ -150,11 +148,11 @@ export const Navbar: React.FC<NavbarProps> = ({
         </div>
 
         {/* Mobile Sub-Navigation */}
-        <div className="flex md:hidden items-center justify-around py-2 border-t border-slate-800/80">
+        <div className="flex md:hidden items-center justify-around py-2 border-t border-slate-200">
           <button
             onClick={() => setActiveTab('exam')}
             className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold ${
-              activeTab === 'exam' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+              activeTab === 'exam' ? 'bg-indigo-600 text-white' : 'text-slate-500'
             }`}
           >
             <GraduationCap className="w-3.5 h-3.5" />
@@ -163,7 +161,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setActiveTab('search')}
             className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold ${
-              activeTab === 'search' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+              activeTab === 'search' ? 'bg-indigo-600 text-white' : 'text-slate-500'
             }`}
           >
             <Search className="w-3.5 h-3.5" />
@@ -172,7 +170,7 @@ export const Navbar: React.FC<NavbarProps> = ({
           <button
             onClick={() => setActiveTab('admin')}
             className={`flex items-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold ${
-              activeTab === 'admin' ? 'bg-indigo-600 text-white' : 'text-slate-400'
+              activeTab === 'admin' ? 'bg-slate-900 text-white' : 'text-slate-500'
             }`}
           >
             <Award className="w-3.5 h-3.5" />

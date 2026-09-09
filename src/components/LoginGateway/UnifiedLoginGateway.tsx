@@ -92,22 +92,18 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-hidden">
-      {/* Ambient background glow */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-3xl pointer-events-none" />
-
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between selection:bg-indigo-500 selection:text-white relative overflow-hidden">
       {/* Top Header with Branding and Language Selector */}
       <header className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between z-10">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 text-white">
+          <div className="w-11 h-11 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
             <GraduationCap className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-base sm:text-lg font-black tracking-tight text-white flex items-center gap-2">
+            <h1 className="text-base sm:text-lg font-black tracking-tight text-slate-900 flex items-center gap-2">
               <span>Digital Institute of Computer Education</span>
             </h1>
-            <p className="text-xs text-indigo-300 font-medium">
+            <p className="text-xs text-indigo-600 font-medium">
               {lang === 'ur'
                 ? 'اسکالرشپ و قابلیت امتحانی پورٹل (DICE Scholarship Exam)'
                 : lang === 'roman'
@@ -118,7 +114,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
         </div>
 
         {/* Language Switcher */}
-        <div className="flex items-center bg-slate-800/80 p-1 rounded-xl border border-slate-700/80 backdrop-blur-md">
+        <div className="flex items-center bg-white p-1 rounded-xl border border-slate-200">
           <Globe className="w-4 h-4 text-slate-400 mx-2 hidden sm:inline" />
           <button
             type="button"
@@ -126,7 +122,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               lang === 'ur'
                 ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             اردو
@@ -137,7 +133,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               lang === 'roman'
                 ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             Roman
@@ -148,7 +144,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
             className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
               lang === 'en'
                 ? 'bg-indigo-600 text-white shadow-xs'
-                : 'text-slate-400 hover:text-white'
+                : 'text-slate-500 hover:text-slate-900'
             }`}
           >
             English
@@ -158,13 +154,13 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
 
       {/* Main Secure Login Gateway Card */}
       <main className="w-full max-w-md mx-auto px-4 sm:px-6 my-auto py-8 z-10">
-        <div className="bg-slate-800/95 rounded-3xl border border-slate-700 shadow-2xl p-6 sm:p-8 backdrop-blur-xl space-y-6">
+        <div className="bg-white rounded-3xl border border-slate-200 shadow-sm p-6 sm:p-8 space-y-6">
           {/* Card Header */}
           <div className="text-center space-y-2">
-            <div className="inline-flex p-3 rounded-2xl bg-indigo-500/15 border border-indigo-500/25 text-indigo-400 mb-1">
-              {showAdminField ? <ShieldCheck className="w-7 h-7 text-amber-400" /> : <KeyRound className="w-7 h-7" />}
+            <div className="inline-flex p-3 rounded-2xl bg-indigo-50 border border-indigo-100 text-indigo-600 mb-1">
+              {showAdminField ? <ShieldCheck className="w-7 h-7 text-slate-900" /> : <KeyRound className="w-7 h-7" />}
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+            <h2 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
               {showAdminField
                 ? lang === 'ur'
                   ? 'ایڈمن و ایگزامینر لاگ ان'
@@ -228,7 +224,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
               <button
                 id="login-gateway-submit-btn"
                 type="submit"
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition-all transform active:scale-98 cursor-pointer"
+                className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 transition-all transform active:scale-98 cursor-pointer"
               >
                 <span>
                   {lang === 'ur'
@@ -278,7 +274,7 @@ export const UnifiedLoginGateway: React.FC<UnifiedLoginGatewayProps> = ({
               <button
                 id="admin-login-submit-btn"
                 type="submit"
-                className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-600/30 flex items-center justify-center gap-2 transition-all transform active:scale-98 cursor-pointer"
+                className="w-full py-3.5 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-black text-sm shadow-sm flex items-center justify-center gap-2 transition-all transform active:scale-98 cursor-pointer"
               >
                 <Lock className="w-4 h-4" />
                 <span>

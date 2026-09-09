@@ -3,8 +3,8 @@
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-    background-color: #f0ebf8;
-    color: #202124;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 
@@ -37,48 +37,31 @@
   letter-spacing: 0 !important;
 }
 
-/* Google Forms styling accents */
-.google-form-bg {
-  background-color: #f0ebf8;
-}
-
-.google-purple {
-  color: #673ab7;
-}
-
-.bg-google-purple {
-  background-color: #673ab7;
-}
-
-.border-google-purple {
-  border-color: #673ab7;
-}
-
-/* Google Forms Question Card styling with active strip */
+/* Clean question card styling with a single accent active strip */
 .g-card {
   background-color: #ffffff;
   border-radius: 0.75rem;
-  border: 1px solid #dadce0;
+  border: 1px solid #e2e8f0;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .g-card-active {
-  border-right-width: 6px;
-  border-right-color: #673ab7;
-  box-shadow: 0 1px 3px 0 rgba(60,64,67,0.3), 0 4px 8px 3px rgba(60,64,67,0.15);
+  border-right-width: 4px;
+  border-right-color: #4f46e5;
+  box-shadow: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
 }
 
 [dir="ltr"] .g-card-active {
   border-right-width: 1px;
-  border-right-color: #dadce0;
-  border-left-width: 6px;
-  border-left-color: #673ab7;
+  border-right-color: #e2e8f0;
+  border-left-width: 4px;
+  border-left-color: #4f46e5;
 }
 
-/* Google Forms Underline Input effect */
+/* Simple underline input effect */
 .g-input-underline {
   border: none;
-  border-bottom: 1px solid #dadce0;
+  border-bottom: 1px solid #e2e8f0;
   border-radius: 0;
   padding: 0.5rem 0.25rem;
   background: transparent;
@@ -87,7 +70,7 @@
 
 .g-input-underline:focus {
   outline: none;
-  border-bottom: 2px solid #673ab7;
+  border-bottom: 2px solid #4f46e5;
 }
 
 @media print {

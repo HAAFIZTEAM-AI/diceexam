@@ -458,7 +458,7 @@ export const AdaptiveExamRunner: React.FC<AdaptiveExamRunnerProps> = ({
               <button
                 type="button"
                 onClick={onExit}
-                className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+                className="w-full sm:w-auto py-3 px-6 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>پورٹل سے لاگ آؤٹ کریں</span>

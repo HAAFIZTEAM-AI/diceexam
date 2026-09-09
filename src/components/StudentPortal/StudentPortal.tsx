@@ -128,37 +128,37 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between selection:bg-indigo-500 selection:text-white">
       {/* Top Student Navigation Bar */}
-      <header className="w-full bg-slate-800/95 border-b border-slate-700 sticky top-0 z-40 backdrop-blur-md">
+      <header className="w-full bg-white border-b border-slate-200 sticky top-0 z-40">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3.5 flex flex-wrap items-center justify-between gap-4">
           {/* Logo & Student Identity */}
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-cyan-500 flex items-center justify-center text-white shadow-md shadow-indigo-500/20">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600 flex items-center justify-center text-white">
               <GraduationCap className="w-5 h-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-sm font-black text-white tracking-tight">
+                <h1 className="text-sm font-black text-slate-900 tracking-tight">
                   {student.name}
                 </h1>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
                   {student.rollNo}
                 </span>
                 {student.isHafiz && (
-                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-500/20 text-emerald-300 font-bold">
+                  <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-100 font-bold">
                     حافظِ قرآن
                   </span>
                 )}
               </div>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-slate-500">
                 Digital Institute of Computer Education • {student.grade}
               </p>
             </div>
           </div>
 
           {/* 2 Tabs Only (Leaderboard completely removed) */}
-          <nav className="flex items-center bg-slate-900/90 p-1 rounded-2xl border border-slate-700">
+          <nav className="flex items-center bg-slate-100 p-1 rounded-2xl border border-slate-200">
             {/* Tab 1: Aptitude Test */}
             <button
               id="tab-aptitude-btn"
@@ -170,7 +170,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'aptitude'
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               <Play className="w-3.5 h-3.5" />
@@ -190,11 +190,11 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 activeTab === 'result'
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'text-slate-400 hover:text-white'
+                  : 'text-slate-500 hover:text-slate-900'
               }`}
             >
               {paperConfig.isResultCheckingLocked ? (
-                <Lock className="w-3.5 h-3.5 text-amber-400" />
+                <Lock className="w-3.5 h-3.5 text-amber-500" />
               ) : (
                 <FileCheck2 className="w-3.5 h-3.5" />
               )}
@@ -202,23 +202,23 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                 {lang === 'ur' ? 'نتیجہ (Result)' : 'Result'}
               </span>
               {paperConfig.isResultCheckingLocked ? (
-                <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-500/30 text-rose-300 font-mono font-bold">
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 font-mono font-bold">
                   LOCKED
                 </span>
               ) : studentSubmission ? (
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
               ) : null}
             </button>
           </nav>
 
           {/* Language & Logout Controls */}
           <div className="flex items-center gap-2">
-            <div className="flex items-center bg-slate-900/80 p-1 rounded-xl border border-slate-700">
+            <div className="flex items-center bg-slate-100 p-1 rounded-xl border border-slate-200">
               <button
                 type="button"
                 onClick={() => onLanguageChange('ur')}
                 className={`px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
-                  lang === 'ur' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  lang === 'ur' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 اردو
@@ -227,7 +227,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                 type="button"
                 onClick={() => onLanguageChange('roman')}
                 className={`px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
-                  lang === 'roman' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  lang === 'roman' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 Roman
@@ -236,7 +236,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                 type="button"
                 onClick={() => onLanguageChange('en')}
                 className={`px-2 py-1 rounded-lg text-xs font-semibold cursor-pointer ${
-                  lang === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'
+                  lang === 'en' ? 'bg-indigo-600 text-white' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 EN
@@ -248,7 +248,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               type="button"
               onClick={onLogout}
               title="Logout / Switch ID"
-              className="p-2 rounded-xl bg-slate-900 hover:bg-slate-700 text-slate-300 hover:text-rose-400 border border-slate-700 transition-colors cursor-pointer flex items-center gap-1 text-xs"
+              className="p-2 rounded-xl bg-white hover:bg-slate-100 text-slate-500 hover:text-rose-500 border border-slate-200 transition-colors cursor-pointer flex items-center gap-1 text-xs"
             >
               <LogOut className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">
@@ -275,46 +275,46 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               />
             ) : studentSubmission ? (
               /* Already Completed Screen */
-              <div className="bg-slate-800/90 rounded-3xl border border-emerald-500/40 p-8 sm:p-12 text-center max-w-xl mx-auto backdrop-blur-md space-y-6 shadow-2xl animate-in fade-in">
-                <div className="w-20 h-20 rounded-3xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto border border-emerald-500/30 shadow-inner">
+              <div className="bg-white rounded-3xl border border-emerald-200 p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 shadow-sm animate-in fade-in">
+                <div className="w-20 h-20 rounded-3xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
                   <CheckCircle2 className="w-10 h-10" />
                 </div>
                 <div className="space-y-3">
-                  <h2 className="text-2xl sm:text-3xl font-black text-white urdu-text leading-relaxed">
+                  <h2 className="text-2xl sm:text-3xl font-black text-emerald-950 urdu-text leading-relaxed">
                     مبارک ہو آپ نے 25% پیپر مکمل کر لیا ہے!
                   </h2>
-                  <p className="text-xs sm:text-sm font-bold text-emerald-400 font-mono">
+                  <p className="text-xs sm:text-sm font-bold text-emerald-600 font-mono">
                     Mubarak ho aap ne 25% paper complete kar liya hai!
                   </p>
-                  <p className="text-xs sm:text-sm text-slate-300 urdu-text leading-relaxed">
+                  <p className="text-xs sm:text-sm text-slate-600 urdu-text leading-relaxed">
                     آپ کا 25 سوالات پر مشتمل امتحانی پرچہ کامیابی کے ساتھ امتحانی سرور میں ریکارڈ ہو چکا ہے۔
                   </p>
                 </div>
 
-                <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-700 text-left font-mono text-xs space-y-2 text-slate-300">
+                <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left font-mono text-xs space-y-2 text-slate-600">
                   <div className="flex justify-between">
                     <span className="text-slate-500">Roll No:</span>
-                    <span className="text-indigo-400 font-bold">{studentSubmission.rollNo}</span>
+                    <span className="text-indigo-600 font-bold">{studentSubmission.rollNo}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Candidate Name:</span>
-                    <span className="text-white">{studentSubmission.student.name}</span>
+                    <span className="text-slate-900">{studentSubmission.student.name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Questions Completed:</span>
-                    <span className="text-emerald-400 font-bold">25 / 25 Questions</span>
+                    <span className="text-emerald-600 font-bold">25 / 25 Questions</span>
                   </div>
                 </div>
 
                 {paperConfig.isResultCheckingLocked ? (
-                  <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs urdu-text leading-relaxed text-right" dir="rtl">
+                  <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800 text-xs urdu-text leading-relaxed text-right" dir="rtl">
                     امتحانی کمیٹی کی جانب سے رزلٹ فی الوقت مقفل (Locked) ہے۔ ایڈمن کی طرف سے جاری ہونے پر آپ نتیجہ چیک کر سکیں گے۔
                   </div>
                 ) : (
                   <button
                     type="button"
                     onClick={() => setActiveTab('result')}
-                    className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-indigo-600 to-cyan-500 hover:from-indigo-500 hover:to-cyan-400 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 cursor-pointer transition-all"
+                    className="w-full py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-sm shadow-sm flex items-center justify-center gap-2 cursor-pointer transition-all"
                   >
                     <FileCheck2 className="w-4 h-4" />
                     <span>نتیجہ کارڈ دیکھیں (View Marksheet)</span>
@@ -340,20 +340,20 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
           <div className="space-y-6 animate-in fade-in">
             {/* MANDATORY CHECK: Admin Result Lock */}
             {paperConfig.isResultCheckingLocked ? (
-              <div className="bg-slate-800/95 rounded-3xl border border-rose-500/40 p-8 sm:p-12 text-center max-w-xl mx-auto backdrop-blur-md space-y-6 shadow-2xl">
-                <div className="w-16 h-16 rounded-3xl bg-rose-500/20 text-rose-400 flex items-center justify-center mx-auto border border-rose-500/30">
+              <div className="bg-white rounded-3xl border border-rose-200 p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 shadow-sm">
+                <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center mx-auto border border-rose-200">
                   <Lock className="w-8 h-8" />
                 </div>
                 <div className="space-y-2">
-                  <span className="text-xs font-mono px-3 py-1 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold uppercase">
+                  <span className="text-xs font-mono px-3 py-1 rounded-full bg-rose-50 text-rose-600 border border-rose-200 font-bold uppercase">
                     {lang === 'ur' ? 'نتائج مقفل ہیں' : 'Result Checking Locked'}
                   </span>
-                  <h3 className="text-xl sm:text-2xl font-black text-white mt-3">
+                  <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-3">
                     {lang === 'ur'
                       ? 'امتحانی نتائج فی الوقت مقفل ہیں'
                       : 'Results are Currently Locked by Administration'}
                   </h3>
-                  <p className="text-xs sm:text-sm text-slate-300 mt-2 leading-[2.2] urdu-text">
+                  <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-[2.2] urdu-text">
                     {lang === 'ur'
                       ? 'ڈجیٹل انسٹیٹیوٹ آف کمپیوٹر ایجوکیشن (Digital Institute of Computer Education) کی امتحانی کمیٹی کے فیصلے کے مطابق نتائج فی الوقت مقفل رکھے گئے ہیں۔ ایڈمن پینل سے نتیجہ ان لاک ہونے پر آپ کا نتیجہ یہاں دکھایا جائے گا۔'
                       : 'According to the Digital Institute of Computer Education examination board, results are securely locked for final audit. They will be published once officially authorized by the administration.'}
@@ -363,7 +363,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                   <button
                     type="button"
                     onClick={() => setActiveTab('aptitude')}
-                    className="py-3 px-6 rounded-2xl bg-slate-700 hover:bg-slate-600 text-white font-bold text-xs cursor-pointer transition-all"
+                    className="py-3 px-6 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer transition-all"
                   >
                     {lang === 'ur' ? '← امتحانی پرچے پر واپس جائیں' : '← Back to Exam'}
                   </button>
@@ -375,12 +375,12 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               showProvisional ? (
                 <div className="space-y-4">
                   {studentSubmission.status !== 'published' && (
-                    <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between text-xs text-amber-300">
-                      <span>⚠️ یہ عبوری مارک شیٹ ہے۔</span>
+                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-2xl flex items-center justify-between text-xs text-amber-700">
+                      <span>یہ عبوری مارک شیٹ ہے۔</span>
                       <button
                         type="button"
                         onClick={() => setShowProvisional(false)}
-                        className="px-3 py-1 rounded-lg bg-slate-800 text-white font-bold hover:bg-slate-700 cursor-pointer"
+                        className="px-3 py-1 rounded-lg bg-slate-900 text-white font-bold hover:bg-slate-800 cursor-pointer"
                       >
                         واپس جائیں (Back)
                       </button>
@@ -397,15 +397,15 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                 </div>
               ) : (
                 /* Submission recorded and awaiting publish or instant checking */
-                <div className="bg-slate-800/90 rounded-3xl border border-slate-700/80 p-8 sm:p-12 text-center max-w-xl mx-auto backdrop-blur-md space-y-6 shadow-2xl">
-                  <div className="w-16 h-16 rounded-3xl bg-amber-500/20 text-amber-400 flex items-center justify-center mx-auto border border-amber-500/30">
+                <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 shadow-sm">
+                  <div className="w-16 h-16 rounded-3xl bg-amber-50 text-amber-500 flex items-center justify-center mx-auto border border-amber-200">
                     <Clock className="w-8 h-8 animate-spin-slow" />
                   </div>
                   <div>
-                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold uppercase">
+                    <span className="text-xs font-mono px-3 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200 font-bold uppercase">
                       {lang === 'ur' ? 'امتحان زیرِ جائزہ' : 'Under Evaluation'}
                     </span>
-                    <h3 className="text-xl sm:text-2xl font-black text-white mt-3">
+                    <h3 className="text-xl sm:text-2xl font-black text-slate-900 mt-3">
                       {lang === 'ur'
                         ? 'امتحان کامیابی سے جمع ہو گیا ہے'
                         : 'Exam Submitted Successfully'}
@@ -417,18 +417,18 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                     </p>
                   </div>
 
-                  <div className="p-4 bg-slate-900/80 rounded-2xl border border-slate-700 text-left font-mono text-xs space-y-1.5 text-slate-300">
+                  <div className="p-4 bg-slate-50 rounded-2xl border border-slate-200 text-left font-mono text-xs space-y-1.5 text-slate-600">
                     <div className="flex justify-between">
                       <span className="text-slate-500">Student Roll ID:</span>
-                      <span className="text-white font-bold">{studentSubmission.rollNo}</span>
+                      <span className="text-slate-900 font-bold">{studentSubmission.rollNo}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Candidate Name:</span>
-                      <span className="text-white">{studentSubmission.student.name}</span>
+                      <span className="text-slate-900">{studentSubmission.student.name}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Objective Marks:</span>
-                      <span className="text-emerald-400 font-bold font-mono">
+                      <span className="text-emerald-600 font-bold font-mono">
                         {studentSubmission.rawObjectiveScore} / {studentSubmission.totalObjectiveScore}
                       </span>
                     </div>
@@ -439,9 +439,9 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                       type="button"
                       disabled={isInstantEvaluating}
                       onClick={handleInstantEvaluateAndPublish}
-                      className="w-full sm:w-auto py-3 px-5 rounded-xl bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white text-xs font-black shadow-lg shadow-indigo-500/25 transition-all cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full sm:w-auto py-3 px-5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black shadow-sm transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60"
                     >
-                      <Sparkles className={`w-4 h-4 text-amber-300 ${isInstantEvaluating ? 'animate-spin' : ''}`} />
+                      <Sparkles className={`w-4 h-4 ${isInstantEvaluating ? 'animate-spin' : ''}`} />
                       <span>
                         {isInstantEvaluating
                           ? 'AI چیکنگ جاری ہے...'
@@ -452,9 +452,9 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                     <button
                       type="button"
                       onClick={() => setShowProvisional(true)}
-                      className="w-full sm:w-auto py-3 px-4 rounded-xl bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
+                      className="w-full sm:w-auto py-3 px-4 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-2"
                     >
-                      <FileCheck2 className="w-4 h-4 text-indigo-400" />
+                      <FileCheck2 className="w-4 h-4 text-indigo-600" />
                       <span>عبوری رزلٹ دیکھیں</span>
                     </button>
                   </div>
@@ -462,14 +462,14 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
               )
             ) : (
               /* No submission found */
-              <div className="bg-slate-800/90 rounded-3xl border border-slate-700/80 p-8 sm:p-12 text-center max-w-lg mx-auto backdrop-blur-md space-y-5">
-                <div className="w-16 h-16 rounded-3xl bg-slate-900 text-slate-400 flex items-center justify-center mx-auto border border-slate-700">
+              <div className="bg-white rounded-3xl border border-slate-200 p-8 sm:p-12 text-center max-w-lg mx-auto space-y-5 shadow-sm">
+                <div className="w-16 h-16 rounded-3xl bg-slate-50 text-slate-400 flex items-center justify-center mx-auto border border-slate-200">
                   <AlertCircle className="w-8 h-8" />
                 </div>
-                <h3 className="text-xl font-black text-white">
+                <h3 className="text-xl font-black text-slate-900">
                   {lang === 'ur' ? 'کوئی پرچہ جمع نہیں ہوا' : 'No Exam Record Found'}
                 </h3>
-                <p className="text-xs sm:text-sm text-slate-400 urdu-text">
+                <p className="text-xs sm:text-sm text-slate-500 urdu-text">
                   {lang === 'ur'
                     ? 'آپ نے ابھی تک ایپٹی ٹیوڈ ٹیسٹ حل نہیں کیا۔ نتیجہ دیکھنے کے لیے پہلے امتحان دیں۔'
                     : 'You haven’t completed an exam session yet. Take the test to receive your scorecard.'}
@@ -480,7 +480,7 @@ export const StudentPortal: React.FC<StudentPortalProps> = ({
                     setActiveTab('aptitude');
                     setIsExamRunning(true);
                   }}
-                  className="py-3 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs cursor-pointer shadow-md transition-all"
+                  className="py-3 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs cursor-pointer shadow-sm transition-all"
                 >
                   {lang === 'ur' ? '25 سوالات کا ٹیسٹ شروع کریں' : 'Start 25 Questions Exam'}
                 </button>
